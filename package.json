@@ -1,0 +1,40 @@
+{
+  "name": "@midwest/error-handler",
+  "version": "0.0.1",
+  "description": "Error handler for Express",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint --ignore-pattern dump .",
+    "prepublish": "npm run lint",
+    "preversion": "npm run lint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/midwest-js/error-handler.git"
+  },
+  "keywords": [
+    "Midwest",
+    "Express"
+  ],
+  "author": "Linus Miller <lohfu@lohfu.io> (https://lohfu.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/midwest-js/error-handler/issues"
+  },
+  "homepage": "https://github.com/midwest-js/error-handler#readme",
+  "dependencies": {
+    "@bmp/highlight-stack": "^0.1.2",
+    "chalk": "^2.4.1",
+    "debug": "^4.1.0",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "eslint": "^5.7.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0"
+  }
+}
