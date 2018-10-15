@@ -17,7 +17,6 @@ const chalk = require('chalk')
 
 // modules > internal
 const highlightStack = require('@bmp/highlight-stack')
-const formatError = require('./format')
 
 // string added to all errors logged to console
 const prefix = `[${chalk.red('EE')}] `
@@ -28,25 +27,32 @@ const prefix = `[${chalk.red('EE')}] `
  *
  * @private
  */
-function defaultConsole (error, config) {
+function defaultConsole (error) {
+  const status = error.status || 500
   // note unformatted error will not have any own properties to loop over. ie,
   // format needs to be called first
-  let status
+  let styledStatus
   let message
-  if (!config.all && error.status < 400) {
-    status = chalk.cyan(error.status)
-  } else if (!config.all && error.status < 500) {
-    status = chalk.yellow(error.status)
+
+  if (error.status < 400) {
+    // redirect
+    styledStatus = chalk.cyan(status)
+  } else if (error.status < 500) {
+    // client error
+    styledStatus = chalk.yellow(status)
   } else {
-    status = chalk.red(error.status)
+    // server error
+    styledStatus = chalk.red(status)
     message = `[${error.name}] ${error.message}`
   }
 
-  status = chalk.bold(status)
+  styledStatus = chalk.bold(styledStatus)
 
-  console.error(`${prefix}${status} ${(message || error.message)}`)
-  if (error.status === 422) {
-    console.error(`${prefix}details: ${JSON.stringify(error.details, null, '  ')}`)
+  console.error(`${prefix}${styledStatus} ${(message || error.message)}`)
+
+  // 422 is missing properties, show what they have sent
+  if (error.status === 422 && error.body) {
+    console.error(`${prefix}body: ${JSON.stringify(error.body, null, '  ')}`)
   }
 
   if (error.stack) {
@@ -63,29 +69,15 @@ function defaultConsole (error, config) {
  * @param {Object} config - Optional config object to override the default
  * config on a per log basis.
  */
-module.exports = function logError (error, req, config, format = false) {
-  if (format) {
-    error = (_.isFunction(config.format) ? config.format : formatError)(error, req, config)
-  }
-
-  let logConsole
-  let logStore
-
-  if (config.console) {
-    logConsole = _.isFunction(config.console) ? config.console : defaultConsole
-  }
-
-  if (_.isFunction(config.store)) {
-    logStore = config.store
-  }
-
+module.exports = function logError (error, config = { console: true }) {
   if (!config.ignore || config.ignore.indexOf(error.status) < 0) {
-    if (logConsole) {
-      logConsole(error, config)
-    }
+    const loggers = [
+      (_.isFunction(config.console) ? config.console : defaultConsole)(error),
+      ...(config.loggers ? config.loggers.map(logger => logger(error)) : []),
+    ]
 
-    if (logStore) {
-      logStore(error, config)
-    }
+    return Promise.all(loggers)
   }
+
+  return Promise.resolve()
 }

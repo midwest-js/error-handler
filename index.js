@@ -21,21 +21,25 @@ module.exports = function (config) {
   return function errorHandler (error, req, res, next) {
     error = format(error, req, config)
 
-    log(error, req, config.log)
+    const promise = config.log ? log(error, config.log) : Promise.resolve()
 
-    // limit what properties are sent to the client by overriding toJSON().
-    if (req.isAdmin && !req.isAdmin()) {
-      error.toJSON = function () {
-        return _.pick(this, config.mystify.properties)
-      }
-    }
+    promise
+      .then(() => {
+        // TODO make this more general. and fyi not even
+        // @midwest/membership-session implements isAdmin
+        if (req.isAdmin && !req.isAdmin()) {
+          error.toJSON = function () {
+            return _.pick(this, config.mystify.include)
+          }
+        }
 
-    res.status(error.status).locals = { error }
+        res.status(error.status).locals = { error }
 
-    if (config.post) {
-      config.post(req, res, next)
-    } else {
-      next()
-    }
+        if (config.mw) {
+          config.mw(req, res, next)
+        } else {
+          next()
+        }
+      })
   }
 }
