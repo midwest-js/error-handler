@@ -16,13 +16,13 @@ export interface IError extends Error {
   xhr?: boolean
 }
 
-interface IConfig {
+export interface IConfig {
   mw?: RequestHandler
   log?: ILogConfig
   mystify?: { include: string[] }
 }
 
-interface ILogConfig {
+export interface ILogConfig {
   console?: Function
   ignore?: number[]
   loggers?: Function[]
