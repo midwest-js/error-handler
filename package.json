@@ -2,9 +2,11 @@
   "name": "@midwest/error-handler",
   "version": "0.1.0",
   "description": "Error handler for Express",
-  "main": "index.js",
+  "main": "./index.js",
   "scripts": {
-    "lint": "eslint --ignore-pattern dump .",
+    "build": "tsc",
+    "clean": "rimraf ./*.js ./*.ts",
+    "lint": "eslint --ext ts src",
     "prepublish": "npm run lint",
     "preversion": "npm run lint",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -30,11 +32,16 @@
     "lodash": "^4.17.11"
   },
   "devDependencies": {
+    "@types/express": "^4.17.0",
+    "@types/node": "^12.6.8",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
     "eslint": "^6.1.0",
     "eslint-config-standard": "^13.0.1",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0"
+    "eslint-plugin-standard": "^4.0.0",
+    "rimraf": "^2.6.3"
   }
 }
