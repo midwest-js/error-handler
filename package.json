@@ -26,13 +26,15 @@
   },
   "homepage": "https://github.com/midwest-js/error-handler#readme",
   "dependencies": {
-    "@bmp/highlight-stack": "^0.1.2",
     "chalk": "^2.4.1",
     "debug": "^4.1.0",
+    "highlight-stack": "^0.2.1",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.4",
     "@types/express": "^4.17.0",
+    "@types/lodash": "^4.14.136",
     "@types/node": "^12.6.8",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",

@@ -4,21 +4,22 @@
  * @module @midwest/error-handler/format
  */
 
-'use strict'
-
 // modules > native
-const http = require('http')
+import http from 'http'
 
 // modules > 3rd party
-const _ = require('lodash')
-const debug = require('debug')('@midwest/errorHandler')
+import _ from 'lodash'
+import Debug from 'debug'
+import { IError, IRequest } from './types'
+
+const debug = Debug('@midwest/errorHandler')
 
 const fileLocationPattern = new RegExp(`${process.cwd()}\\/([\\/\\w-_\\.]+\\.js):(\\d*):(\\d*)`)
 
 /*
  * @private
  */
-function parseFileLocation (stack) {
+function parseFileLocation (stack: string) {
   if (_.isString(stack)) {
     return _.zipObject(['filename', 'lineNumber', 'columnNumber'],
       _.tail(stack.match(fileLocationPattern)))
@@ -58,7 +59,7 @@ const allowedProperties = [
  *
  * @returns The formatted error as a plain object.
  */
-module.exports = function formatError (error, req) {
+export default function formatError (error: IError, req: IRequest) {
   let err = _.pick(error, allowedProperties)
 
   const nonStandardProperties = _.difference(Object.keys(error), allowedProperties)
@@ -85,7 +86,7 @@ module.exports = function formatError (error, req) {
     err.xhr = req.xhr
 
     // We mapKeys because Mongo does not allow keys with dots stored to DB.
-    if (!_.isEmpty(req.body)) err.body = _.mapKeys(req.body, (value, key) => key.replace('.', 'DOT'))
+    if (!_.isEmpty(req.body)) err.body = _.mapKeys(req.body, (_value: any, key: string) => key.replace('.', 'DOT'))
     if (!_.isEmpty(req.query)) err.query = req.query
   }
 
@@ -97,7 +98,7 @@ module.exports = function formatError (error, req) {
     delete err.errors
   }
 
-  if (err.status >= 500) {
+  if (err.status >= 500 && err.stack) {
     // use defaults in case any of the location props are already set
     _.defaults(err, parseFileLocation(err.stack))
   } else {
@@ -105,7 +106,7 @@ module.exports = function formatError (error, req) {
   }
 
   // sort properties by name
-  err = _.fromPairs(_.sortBy(_.toPairs(err), (pair) => pair[0]))
+  err = _.fromPairs(_.sortBy(_.toPairs(err), (pair: [ string, any ]) => pair[0]))
 
   debug(`formatted error: ${JSON.stringify(err, null, '\t')}`)
 

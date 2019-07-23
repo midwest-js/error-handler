@@ -8,15 +8,15 @@
  * @module @midwest/error-handler/log
  */
 
-'use strict'
-
-const _ = require('lodash')
+import _ from 'lodash'
 
 // modules > 3rd party
-const chalk = require('chalk')
+import chalk from 'chalk'
 
 // modules > internal
-const highlightStack = require('@bmp/highlight-stack')
+import highlightStack from 'highlight-stack'
+
+import { ILogConfig, IError } from './types'
 
 // string added to all errors logged to console
 const prefix = `[${chalk.red('EE')}] `
@@ -27,22 +27,22 @@ const prefix = `[${chalk.red('EE')}] `
  *
  * @private
  */
-function defaultConsole (error) {
+function defaultConsole (error: IError) {
   const status = error.status || 500
   // note unformatted error will not have any own properties to loop over. ie,
   // format needs to be called first
   let styledStatus
   let message
 
-  if (error.status < 400) {
+  if (status < 400) {
     // redirect
-    styledStatus = chalk.cyan(status)
-  } else if (error.status < 500) {
+    styledStatus = chalk.cyan(status.toString(10))
+  } else if (status < 500) {
     // client error
-    styledStatus = chalk.yellow(status)
+    styledStatus = chalk.yellow(status.toString(10))
   } else {
     // server error
-    styledStatus = chalk.red(status)
+    styledStatus = chalk.red(status.toString(10))
     message = `[${error.name}] ${error.message}`
   }
 
@@ -69,8 +69,9 @@ function defaultConsole (error) {
  * @param {Object} config - Optional config object to override the default
  * config on a per log basis.
  */
-module.exports = function logError (error, config = { console: true }) {
-  if (!config.ignore || config.ignore.indexOf(error.status) < 0) {
+
+export default function logError (error: IError, config: ILogConfig = {}): Promise<any> {
+  if (!config.ignore || (error.status && config.ignore.indexOf(error.status) < 0)) {
     const loggers = [
       (_.isFunction(config.console) ? config.console : defaultConsole)(error),
       ...(config.loggers ? config.loggers.map(logger => logger(error)) : []),

@@ -4,22 +4,28 @@
  * @module @midwest/error-handler/createError
  */
 
-'use strict'
+import _ from 'lodash'
 
-const _ = require('lodash')
+type TErrorConstructor = new (...args:any[]) => Error
 
-module.exports = function createError (message, status) {
+interface IMessageObject {
+  message: string
+  errorConstructor?: TErrorConstructor
+  status :number
+}
+
+export default function createError (message: string | IMessageObject, status: number) {
   let props
-  let ErrorConstructor = Error
+  let ErrorConstructor: TErrorConstructor = Error
 
   if (_.isPlainObject(message)) {
-    props = _.omit(message, 'message')
+    props = _.omit(message as IMessageObject, 'message')
 
-    if (message.errorConstructor) {
+    if (props.errorConstructor) {
       ErrorConstructor = props.errorConstructor
     }
 
-    message = message.message || 'Error'
+    message = (message as IMessageObject).message || 'Error'
   } else {
     props = {}
   }
@@ -27,10 +33,10 @@ module.exports = function createError (message, status) {
   if (_.isPlainObject(status)) {
     Object.assign(props, status)
   } else if (typeof status === 'number') {
-    props.status = status
+    (props as IMessageObject).status = status
   }
 
-  const err = new ErrorConstructor(message)
+  const err = new ErrorConstructor(message as string)
 
   Object.assign(err, props)
 
