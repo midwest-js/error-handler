@@ -2,10 +2,10 @@
   "name": "@midwest/error-handler",
   "version": "0.1.0",
   "description": "Error handler for Express",
-  "main": "./index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf ./*.js ./*.ts",
+    "clean": "rimraf lib",
     "lint": "eslint --ext ts src",
     "prepublish": "npm run lint",
     "preversion": "npm run lint",
